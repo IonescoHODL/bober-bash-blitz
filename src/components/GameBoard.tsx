@@ -39,7 +39,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
   const [hammerActive, setHammerActive] = useState(false);
   const rafRef = useRef<number>();
 
-  // Suivi optimisé de la souris avec requestAnimationFrame
+  // Optimized mouse tracking with requestAnimationFrame
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
       if (rafRef.current) {
@@ -63,64 +63,71 @@ const GameBoard: React.FC<GameBoardProps> = ({
     };
   }, []);
 
-  // Spawn bobers randomly avec intervalle variable
+  // Spawn bobers randomly with variable interval
   useEffect(() => {
     if (!isPlaying) return;
 
     const spawnBober = () => {
-      const visibleBobers = bobers.filter(b => b.visible).length;
-      if (visibleBobers >= 2) return; // Max 2 bobers at once
+      setBobers(currentBobers => {
+        const visibleBobers = currentBobers.filter(b => b.visible).length;
+        if (visibleBobers >= 2) return currentBobers; // Max 2 bobers at once
 
-      const availableHoles = bobers
-        .map((bober, index) => ({ bober, index }))
-        .filter(({ bober }) => !bober.visible);
+        const availableHoles = currentBobers
+          .map((bober, index) => ({ bober, index }))
+          .filter(({ bober }) => !bober.visible);
 
-      if (availableHoles.length === 0) return;
+        if (availableHoles.length === 0) return currentBobers;
 
-      const randomHole = availableHoles[Math.floor(Math.random() * availableHoles.length)];
-      
-      setBobers(prev => prev.map((bober, index) => 
-        index === randomHole.index
-          ? { ...bober, visible: true, hit: false }
-          : bober
-      ));
+        const randomHole = availableHoles[Math.floor(Math.random() * availableHoles.length)];
+        
+        const newBobers = currentBobers.map((bober, index) => 
+          index === randomHole.index
+            ? { ...bober, visible: true, hit: false }
+            : bober
+        );
 
-      // Hide bober after duration et déclencher onBoberExpired si pas touché
-      setTimeout(() => {
-        setBobers(prev => {
-          const currentBober = prev[randomHole.index];
-          if (currentBober.visible && !currentBober.hit) {
-            onBoberExpired();
-            return prev.map((bober, index) => 
-              index === randomHole.index
-                ? { ...bober, visible: false }
-                : bober
-            );
-          }
-          return prev;
-        });
-      }, boberDuration);
+        // Hide bober after duration and trigger onBoberExpired if not hit
+        setTimeout(() => {
+          setBobers(prevBobers => {
+            const currentBober = prevBobers[randomHole.index];
+            if (currentBober.visible && !currentBober.hit) {
+              onBoberExpired();
+              return prevBobers.map((bober, index) => 
+                index === randomHole.index
+                  ? { ...bober, visible: false }
+                  : bober
+              );
+            }
+            return prevBobers;
+          });
+        }, boberDuration);
+
+        return newBobers;
+      });
     };
 
     const interval = setInterval(spawnBober, spawnInterval);
     return () => clearInterval(interval);
-  }, [isPlaying, bobers, boberDuration, spawnInterval, onBoberExpired]);
+  }, [isPlaying, boberDuration, spawnInterval, onBoberExpired]);
 
   const handleHoleClick = useCallback((holeId: number, event: React.MouseEvent) => {
     setHammerActive(true);
 
-    const bober = bobers[holeId];
-    if (bober.visible && !bober.hit) {
-      setBobers(prev => prev.map((b, index) => 
-        index === holeId ? { ...b, hit: true, visible: false } : b
-      ));
-      onBoberHit();
-    } else {
-      onBoberMiss();
-    }
+    setBobers(currentBobers => {
+      const bober = currentBobers[holeId];
+      if (bober.visible && !bober.hit) {
+        onBoberHit();
+        return currentBobers.map((b, index) => 
+          index === holeId ? { ...b, hit: true, visible: false } : b
+        );
+      } else {
+        onBoberMiss();
+        return currentBobers;
+      }
+    });
 
     setTimeout(() => setHammerActive(false), 150);
-  }, [bobers, onBoberHit, onBoberMiss]);
+  }, [onBoberHit, onBoberMiss]);
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
