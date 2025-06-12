@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -99,5 +100,17 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+  
+  /* Curseur personnalisé pour le jeu */
+  .game-area {
+    cursor: none;
+  }
+}
+
+/* Animation pour le curseur marteau */
+@layer utilities {
+  .hammer-cursor {
+    cursor: none;
   }
 }

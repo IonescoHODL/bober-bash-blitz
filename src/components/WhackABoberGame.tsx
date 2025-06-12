@@ -127,7 +127,7 @@ const WhackABoberGame: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-green-100 to-emerald-200">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-green-100 to-emerald-200 game-area">
       <div className="w-full max-w-4xl mx-auto">
         <GameHeader gameState={gameState} />
         

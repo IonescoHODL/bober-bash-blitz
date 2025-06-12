@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Hole from './Hole';
 import Hammer from './Hammer';
 
@@ -33,18 +34,30 @@ const GameBoard: React.FC<GameBoardProps> = ({
   );
   const [hammerPosition, setHammerPosition] = useState({ x: 0, y: 0 });
   const [hammerActive, setHammerActive] = useState(false);
+  const rafRef = useRef<number>();
 
-  // Suivre la souris en permanence
+  // Suivi optimisé de la souris avec requestAnimationFrame
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
-      setHammerPosition({
-        x: event.clientX,
-        y: event.clientY,
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      
+      rafRef.current = requestAnimationFrame(() => {
+        setHammerPosition({
+          x: event.clientX,
+          y: event.clientY,
+        });
       });
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    return () => document.removeEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
   }, []);
 
   // Spawn bobers randomly
@@ -96,7 +109,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
       onBoberMiss();
     }
 
-    setTimeout(() => setHammerActive(false), 200);
+    setTimeout(() => setHammerActive(false), 150);
   }, [bobers, onBoberHit, onBoberMiss]);
 
   return (
