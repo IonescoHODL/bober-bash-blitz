@@ -41,10 +41,10 @@ const Hole: React.FC<HoleProps> = ({ id, isVisible, isHit, onClick }) => {
         </div>
       )}
 
-      {/* Effet de frappe - 4x plus grand et disparition rapide */}
+      {/* Effet de frappe */}
       {isHit && (
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2">
-          <div className="text-8xl animate-explosion">💥</div>
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2">
+          <div className="text-3xl animate-fade-out">💥</div>
         </div>
       )}
     </div>
