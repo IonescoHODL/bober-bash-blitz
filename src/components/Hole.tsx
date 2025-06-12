@@ -15,32 +15,36 @@ const Hole: React.FC<HoleProps> = ({ id, isVisible, isHit, onClick }) => {
 
   return (
     <div
-      className="relative w-24 h-24 md:w-32 md:h-32 mx-auto cursor-pointer"
+      className="relative w-32 h-20 md:w-40 md:h-24 mx-auto cursor-pointer"
       onClick={handleClick}
     >
-      {/* Hole */}
-      <div className="absolute inset-0 bg-gradient-to-b from-amber-900 to-amber-950 rounded-full shadow-inner border-4 border-amber-800">
-        <div className="absolute inset-2 bg-black/30 rounded-full" />
+      {/* Trou ovale en perspective */}
+      <div className="absolute inset-0 bg-gradient-to-b from-amber-900 to-black rounded-full shadow-inner border-4 border-amber-800 transform perspective-75">
+        <div className="absolute inset-2 bg-black/60 rounded-full" />
+        <div className="absolute inset-4 bg-black/80 rounded-full" />
       </div>
 
-      {/* Bober */}
+      {/* Bober qui sort du trou */}
       {isVisible && (
-        <div className={`absolute inset-0 flex items-center justify-center transition-all duration-200 ${
+        <div className={`absolute bottom-2 left-1/2 transform -translate-x-1/2 transition-all duration-200 ${
           isHit ? 'animate-scale-out' : 'animate-scale-in'
         }`}>
           <img
             src="https://i.ibb.co/67QCFPS4/Bober-Taupe.png"
             alt="Bober"
-            className="w-16 h-16 md:w-20 md:h-20 object-contain transform hover:scale-110 transition-transform duration-150"
+            className="w-20 h-20 md:w-24 md:h-24 object-contain transform hover:scale-110 transition-transform duration-150"
             draggable={false}
+            style={{
+              filter: isHit ? 'brightness(1.5)' : 'none'
+            }}
           />
         </div>
       )}
 
-      {/* Hit effect */}
+      {/* Effet de frappe */}
       {isHit && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-2xl animate-fade-out">💥</div>
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2">
+          <div className="text-3xl animate-fade-out">💥</div>
         </div>
       )}
     </div>
