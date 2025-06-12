@@ -47,6 +47,15 @@ const GameHeader: React.FC<GameHeaderProps> = ({ gameState }) => {
         </div>
 
         <div className="text-center">
+          <div className="text-sm text-red-600">Ratés</div>
+          <div className={`text-lg font-bold ${
+            gameState.missedInARow >= 2 ? 'text-red-600 animate-pulse' : 'text-red-500'
+          }`}>
+            {gameState.missedInARow}/3
+          </div>
+        </div>
+
+        <div className="text-center">
           <div className={`text-3xl md:text-4xl font-bold ${
             gameState.timeLeft <= 10 ? 'text-red-600 animate-pulse' : 'text-blue-600'
           }`}>

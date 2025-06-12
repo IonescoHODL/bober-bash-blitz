@@ -6,8 +6,10 @@ import Hammer from './Hammer';
 interface GameBoardProps {
   isPlaying: boolean;
   boberDuration: number;
+  spawnInterval: number;
   onBoberHit: () => void;
   onBoberMiss: () => void;
+  onBoberExpired: () => void;
 }
 
 interface BoberState {
@@ -17,13 +19,14 @@ interface BoberState {
 }
 
 const HOLE_COUNT = 6;
-const BOBER_SPAWN_INTERVAL = 800;
 
 const GameBoard: React.FC<GameBoardProps> = ({
   isPlaying,
   boberDuration,
+  spawnInterval,
   onBoberHit,
   onBoberMiss,
+  onBoberExpired,
 }) => {
   const [bobers, setBobers] = useState<BoberState[]>(
     Array.from({ length: HOLE_COUNT }, (_, i) => ({
@@ -60,7 +63,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
     };
   }, []);
 
-  // Spawn bobers randomly
+  // Spawn bobers randomly avec intervalle variable
   useEffect(() => {
     if (!isPlaying) return;
 
@@ -82,19 +85,26 @@ const GameBoard: React.FC<GameBoardProps> = ({
           : bober
       ));
 
-      // Hide bober after duration
+      // Hide bober after duration et déclencher onBoberExpired si pas touché
       setTimeout(() => {
-        setBobers(prev => prev.map((bober, index) => 
-          index === randomHole.index && !bober.hit
-            ? { ...bober, visible: false }
-            : bober
-        ));
+        setBobers(prev => {
+          const currentBober = prev[randomHole.index];
+          if (currentBober.visible && !currentBober.hit) {
+            onBoberExpired();
+            return prev.map((bober, index) => 
+              index === randomHole.index
+                ? { ...bober, visible: false }
+                : bober
+            );
+          }
+          return prev;
+        });
       }, boberDuration);
     };
 
-    const interval = setInterval(spawnBober, BOBER_SPAWN_INTERVAL);
+    const interval = setInterval(spawnBober, spawnInterval);
     return () => clearInterval(interval);
-  }, [isPlaying, bobers, boberDuration]);
+  }, [isPlaying, bobers, boberDuration, spawnInterval, onBoberExpired]);
 
   const handleHoleClick = useCallback((holeId: number, event: React.MouseEvent) => {
     setHammerActive(true);
